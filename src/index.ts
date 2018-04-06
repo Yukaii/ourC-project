@@ -15,7 +15,7 @@ export enum TokenType {
   NUM = 'NUM',
 }
 
-export const RULES : Map<TokenType, RegExp> = new Map([
+const RULES : Map<TokenType, RegExp> = new Map([
   [TokenType.QUIT, /^quit/i], // case insensitive,
   [TokenType.ID, /^[a-zA-Z][a-zA-Z0-9_]*/],
   [TokenType.NUM, /^[+-]?([0-9]*[.])?[0-9]+/],
@@ -43,7 +43,7 @@ export class Token {
   }
 }
 
-export class Lexer {
+export const Lexer = new class {
   private offset = 0;
   private buf = '';
 
@@ -113,4 +113,5 @@ export class Lexer {
 
     return tokens;
   }
+}(RULES);
 }
