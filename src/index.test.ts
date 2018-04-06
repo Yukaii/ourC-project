@@ -16,4 +16,12 @@ test('Lexer', t => {
     new Token(TokenType.NUM, 3),
     new Token(TokenType.SEMI)
   ]);
+
+  t.deepEqual(Lexer.lex('1+1 ;// here the line comment'), [
+    new Token(TokenType.NUM, 1),
+    new Token(TokenType.PLUS),
+    new Token(TokenType.NUM, 1),
+    new Token(TokenType.SEMI),
+    new Token(TokenType.COMMENT, 'here the line comment')
+  ])
 });

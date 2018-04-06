@@ -13,12 +13,14 @@ export enum TokenType {
   LT = 'LT', // <
   GT = 'GT', // >
   NUM = 'NUM',
-  SEMI = 'SEMI'
+  SEMI = 'SEMI',
+  COMMENT = 'COMMENT'
 }
 
 const RULES : Map<TokenType, RegExp> = new Map([
   [TokenType.QUIT, /^quit/i], // case insensitive,
   [TokenType.ID, /^[a-zA-Z][a-zA-Z0-9_]*/],
+  [TokenType.COMMENT, /^\/\/([^\r\n]+)/],
   [TokenType.ASSIGN, /^:=/],
   [TokenType.SEMI, /^;/],
   [TokenType.PLUS, /^\+/ ],
@@ -92,6 +94,9 @@ export const Lexer = new class {
               break;
             case TokenType.ID:
               value = rawString;
+              break;
+            case TokenType.COMMENT:
+              value = rawString.match(this.rules.get(tokenType) as RegExp)![1].trim();
               break;
             default:
               break;
