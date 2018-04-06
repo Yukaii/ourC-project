@@ -13,13 +13,14 @@ export enum TokenType {
   LT = 'LT', // <
   GT = 'GT', // >
   NUM = 'NUM',
+  SEMI = 'SEMI'
 }
 
 const RULES : Map<TokenType, RegExp> = new Map([
   [TokenType.QUIT, /^quit/i], // case insensitive,
   [TokenType.ID, /^[a-zA-Z][a-zA-Z0-9_]*/],
-  [TokenType.NUM, /^[+-]?([0-9]*[.])?[0-9]+/],
   [TokenType.ASSIGN, /^:=/],
+  [TokenType.SEMI, /^;/],
   [TokenType.PLUS, /^\+/ ],
   [TokenType.MINUS, /^-/],
   [TokenType.TIMES, /^\*/],
@@ -30,6 +31,7 @@ const RULES : Map<TokenType, RegExp> = new Map([
   [TokenType.LE, /^<=/],
   [TokenType.LT, /^</],
   [TokenType.GT, /^>/],
+  [TokenType.NUM, /^([0-9]*[.])?[0-9]+/],
 ])
 
 export class Token {

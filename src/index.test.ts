@@ -2,11 +2,18 @@ import { Lexer, TokenType, Token } from './index';
 import test from 'ava';
 
 test('Lexer', t => {
-  const tokens = Lexer.lex('a > -5')
-
-  t.deepEqual(tokens, [
+  t.deepEqual(Lexer.lex('a > -5;'), [
     new Token(TokenType.ID, 'a'),
     new Token(TokenType.GT),
-    new Token(TokenType.NUM, -5)
+    new Token(TokenType.MINUS),
+    new Token(TokenType.NUM, 5),
+    new Token(TokenType.SEMI)
+  ]);
+
+  t.deepEqual(Lexer.lex('2+3;'), [
+    new Token(TokenType.NUM, 2),
+    new Token(TokenType.PLUS),
+    new Token(TokenType.NUM, 3),
+    new Token(TokenType.SEMI)
   ]);
 });
