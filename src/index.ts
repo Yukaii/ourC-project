@@ -320,10 +320,10 @@ export const Parser = new class {
 
     if (this.match(TokenType.PLUS, TokenType.MINUS)) {
       const token = this.previous();
-      const factor = this.Factor();
+      const term = this.Term();
       return new Node(
         token.type === TokenType.PLUS ? NodeType.ADD : NodeType.SUB,
-        undefined, expression, factor
+        undefined, expression, term
       )
     }
 

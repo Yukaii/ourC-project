@@ -34,6 +34,15 @@ test('Lexer', t => {
     new Token(TokenType.SEMI)
   ]);
 
+  t.deepEqual(Lexer.scan('1 + 5 * 3;'), [
+    new Token(TokenType.NUM, 1),
+    new Token(TokenType.PLUS),
+    new Token(TokenType.NUM, 5),
+    new Token(TokenType.MULTIPLY),
+    new Token(TokenType.NUM, 3),
+    new Token(TokenType.SEMI)
+  ]);
+
   t.deepEqual(Lexer.scan('1+1 ;// here the line comment'), [
     new Token(TokenType.NUM, 1),
     new Token(TokenType.PLUS),
@@ -80,6 +89,20 @@ test('Parse', t => {
       new Node(NodeType.INTEGER, new Token(TokenType.NUM, 3))
     )
   )
+
+  t.deepEqual(parse('1 + 5 * 3;'),
+    new Node(
+      NodeType.ADD,
+      undefined,
+      new Node(NodeType.INTEGER, new Token(TokenType.NUM, 1)),
+      new Node(
+        NodeType.MULTIPLY,
+        undefined,
+        new Node(NodeType.INTEGER, new Token(TokenType.NUM, 5)),
+        new Node(NodeType.INTEGER, new Token(TokenType.NUM, 3)),
+      )
+    )
+  );
 })
 
 test('Test Intepreter', t => {
