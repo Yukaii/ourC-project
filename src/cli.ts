@@ -1,5 +1,5 @@
 import readline from 'readline';
-import { Intepreter } from './index';
+import { Interpreter } from './index';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -33,7 +33,7 @@ let src = ''
 rl.on('line', function(line : string) {
   src += line;
   if (eol(line)) {
-    console.log(Intepreter.inteprete(src));
+    console.log(Interpreter.inteprete(src));
     src = ''
     prompt();
   } else if (line.trim() === 'quit') {

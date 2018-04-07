@@ -517,7 +517,7 @@ class SymbolTable {
 
 const TABLE = new SymbolTable();
 
-export const Intepreter = new class {
+export const Interpreter = new class {
   public inteprete (src : string) {
     const tokens = Lexer.scan(src);
     const ast = Parser.parse(tokens);

@@ -1,4 +1,4 @@
-import { Lexer, TokenType, Token, Parser, NodeType, Node, Intepreter } from './index';
+import { Lexer, TokenType, Token, Parser, NodeType, Node, Interpreter } from './index';
 import * as util from 'util';
 import test from 'ava';
 
@@ -14,8 +14,8 @@ function parse (src : string) {
   return Parser.parse(scan(src));
 }
 
-function inteprete (src : string) {
-  return Intepreter.visit(parse(src));
+function interpret (src : string) {
+  return Interpreter.visit(parse(src));
 }
 
 test('Lexer', t => {
@@ -137,19 +137,19 @@ test('Parse', t => {
   )
 })
 
-test('Test Intepreter', t => {
-  t.deepEqual(inteprete('1 + 3;'), 4);
-  t.deepEqual(inteprete('a := 1 + 3;'), 4);
+test('Test Interpreter', t => {
+  t.deepEqual(interpret('1 + 3;'), 4);
+  t.deepEqual(interpret('a := 1 + 3;'), 4);
 
-  t.deepEqual(inteprete('abc := ( 20 * 5 ) + 1 ;'), 101);
-  t.deepEqual(inteprete('abc * 2 ;'), 202);
+  t.deepEqual(interpret('abc := ( 20 * 5 ) + 1 ;'), 101);
+  t.deepEqual(interpret('abc * 2 ;'), 202);
 
-  t.deepEqual(inteprete(' bcd := 1;'), 1);
-  t.deepEqual(inteprete('bcd := bcd + 10 ;'), 11);
+  t.deepEqual(interpret(' bcd := 1;'), 1);
+  t.deepEqual(interpret('bcd := bcd + 10 ;'), 11);
 
-  t.deepEqual(inteprete('e := bcd;'), 11);
-  t.deepEqual(inteprete('e := e + 3 ;'), 14);
+  t.deepEqual(interpret('e := bcd;'), 11);
+  t.deepEqual(interpret('e := e + 3 ;'), 14);
 
-  t.deepEqual(inteprete('e > bcd ;'), true);
-  t.deepEqual(inteprete('e < bcd ;'), false);
+  t.deepEqual(interpret('e > bcd ;'), true);
+  t.deepEqual(interpret('e < bcd ;'), false);
 })
