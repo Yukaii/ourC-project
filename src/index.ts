@@ -80,6 +80,10 @@ export const Lexer = new class {
     return this.src.slice(this.offset);
   }
 
+  peekChar () {
+    return this.src[this.offset];
+  }
+
   scan (src : string) {
     this.offset = 0;
     this.src = src;
@@ -103,7 +107,15 @@ export const Lexer = new class {
 
           switch(tokenType) {
             case TokenType.NUM:
-              value = rawString.includes('.') ? parseFloat(rawString) : parseInt(rawString);
+              const isFloat = rawString.includes('.');
+              value = isFloat ? parseFloat(rawString) : parseInt(rawString);
+
+              if (isFloat) {
+                if (this.peekChar() && !this.peekChar().match(/\s/)) {
+                  throw new TypeError('Invalid number format');
+                }
+              }
+
               break;
             case TokenType.ID:
               value = rawString;
@@ -130,7 +142,8 @@ export const Lexer = new class {
       }
 
       if (!match) {
-        break;
+        // no token were match
+        throw new TypeError('Invalid token')
       }
     }
 

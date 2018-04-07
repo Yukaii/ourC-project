@@ -6,6 +6,14 @@ function log (object : any) {
   console.log(util.inspect(object, true, null!));
 }
 
+function scan (src : string) {
+  return Lexer.scan(src);
+}
+
+function parse (src : string) {
+  return Parser.parse(scan(src));
+}
+
 test('Lexer', t => {
   t.deepEqual(Lexer.scan('a > -5;'), [
     new Token(TokenType.ID, 'a'),
@@ -31,12 +39,14 @@ test('Lexer', t => {
   ])
 });
 
-test.todo('// TODO: word boundary check, like 345.3435.345');
+test('Invalid float number', t => {
+  const error = t.throws(() => scan('3 + 345.3435.345'), TypeError);
+
+  t.is(error.message, 'Invalid number format');
+})
 
 test('Parse', t => {
-  const ast = Parser.parse(Lexer.scan('a := 1 + -5;'));
-
-  t.deepEqual(ast,
+  t.deepEqual(parse('a := 1 + -5;'),
     new Node(
       NodeType.ASSIGN,
       undefined,
@@ -47,4 +57,13 @@ test('Parse', t => {
       )
     )
   );
+
+  t.deepEqual(parse('2+3;'),
+    new Node(
+      NodeType.ADD,
+      undefined,
+      new Node(NodeType.INTEGER, new Token(TokenType.NUM, 2)),
+      new Node(NodeType.INTEGER, new Token(TokenType.NUM, 3))
+    )
+  )
 })
