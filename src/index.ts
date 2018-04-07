@@ -435,7 +435,6 @@ export const Parser = new class {
       const sign = this.previous();
       this.consume(TokenType.NUM, 'Number expected');
 
-
       const number = this.previous();
       // deal with sign
       if (sign.type === TokenType.MINUS) {
@@ -519,7 +518,10 @@ class SymbolTable {
 const TABLE = new SymbolTable();
 
 export const Intepreter = new class {
-  public inteprete (ast : Node) {
+  public inteprete (src : string) {
+    const tokens = Lexer.scan(src);
+    const ast = Parser.parse(tokens);
+
     return this.visit(ast);
   }
 
@@ -527,7 +529,7 @@ export const Intepreter = new class {
     return TABLE;
   }
 
-  private visit (node : Node) : any {
+  visit (node : Node) : any {
     switch(node.nodeType) {
       // binary operations
       case NodeType.ADD:

@@ -15,7 +15,7 @@ function parse (src : string) {
 }
 
 function inteprete (src : string) {
-  return Intepreter.inteprete(parse(src));
+  return Intepreter.visit(parse(src));
 }
 
 test('Lexer', t => {
