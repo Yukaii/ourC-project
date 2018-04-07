@@ -1,4 +1,4 @@
-import { Lexer, TokenType, Token, Parser, NodeType, Node } from './index';
+import { Lexer, TokenType, Token, Parser, NodeType, Node, Intepreter } from './index';
 import * as util from 'util';
 import test from 'ava';
 
@@ -12,6 +12,10 @@ function scan (src : string) {
 
 function parse (src : string) {
   return Parser.parse(scan(src));
+}
+
+function inteprete (src : string) {
+  return Intepreter.inteprete(parse(src));
 }
 
 test('Lexer', t => {
@@ -76,4 +80,21 @@ test('Parse', t => {
       new Node(NodeType.INTEGER, new Token(TokenType.NUM, 3))
     )
   )
+})
+
+test('Test Intepreter', t => {
+  t.deepEqual(inteprete('1 + 3;'), 4);
+  t.deepEqual(inteprete('a := 1 + 3;'), 4);
+
+  t.deepEqual(inteprete('abc := ( 20 * 5 ) + 1 ;'), 101);
+  t.deepEqual(inteprete('abc * 2 ;'), 202);
+
+  t.deepEqual(inteprete(' bcd := 1;'), 1);
+  t.deepEqual(inteprete('bcd := bcd + 10 ;'), 11);
+
+  t.deepEqual(inteprete('e := bcd;'), 11);
+  t.deepEqual(inteprete('e := e + 3 ;'), 14);
+
+  t.deepEqual(inteprete('e > bcd ;'), true);
+  t.deepEqual(inteprete('e < bcd ;'), false);
 })

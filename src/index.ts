@@ -502,3 +502,74 @@ export const Parser = new class {
   }
 
 }();
+
+class SymbolTable {
+  private store : { [identifier : string]: any  } = { };
+
+  set (identifier : string, value : any) {
+    this.store[identifier] = value;
+    return value;
+  }
+
+  get (identifier : string) {
+    return this.store[identifier];
+  }
+}
+
+const TABLE = new SymbolTable();
+
+export const Intepreter = new class {
+  public inteprete (ast : Node) {
+    return this.visit(ast);
+  }
+
+  get symbolTable () {
+    return TABLE;
+  }
+
+  private visit (node : Node) : any {
+    switch(node.nodeType) {
+      // binary operations
+      case NodeType.ADD:
+        return this.visit(node.left as Node) + this.visit(node.right as Node);
+      case NodeType.SUB:
+        return this.visit(node.left as Node) - this.visit(node.right as Node);
+      case NodeType.MULTIPLY:
+        return this.visit(node.left as Node) * this.visit(node.right as Node);
+      case NodeType.DIVIDE:
+        return this.visit(node.left as Node) / this.visit(node.right as Node);
+
+      // boolean binary operations
+      case NodeType.EQ:
+        return this.visit(node.left as Node) === this.visit(node.right as Node);
+      case NodeType.GT:
+        return this.visit(node.left as Node) > this.visit(node.right as Node);
+      case NodeType.GE:
+        return this.visit(node.left as Node) >= this.visit(node.right as Node);
+      case NodeType.LT:
+        return this.visit(node.left as Node) < this.visit(node.right as Node);
+      case NodeType.LE:
+        return this.visit(node.left as Node) <= this.visit(node.right as Node);
+      case NodeType.NEQ:
+        return this.visit(node.left as Node) !== this.visit(node.right as Node);
+
+      // value node
+      case NodeType.INTEGER:
+      case NodeType.FLOAT:
+        var token = node.value as Token;
+        return token.value;
+
+      case NodeType.ASSIGN:
+        var idNode = node.left as Node;
+        var token = idNode.value as Token;
+        return TABLE.set(token.value, this.visit(node.right as Node));
+
+      case NodeType.ID:
+        var token = node.value as Token;
+        return TABLE.get(token.value);
+
+      default:
+        throw new TypeError(`${NodeType} type is not implemented`);
+    }
+  }
+};
