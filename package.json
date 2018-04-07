@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "repl": "tsc && node ./out/cli.js",
     "watch": "tsc -w",
     "test": "ava"
   },
