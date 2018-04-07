@@ -214,8 +214,10 @@ export const Parser = new class {
       let expression = new Node(NodeType.ID, id);
 
       if (this.match(TokenType.ASSIGN)) {
-        const exp = this.ArithExp() || this.IDlessArithExpOrBexp();
+        const exp = this.ArithExp();
         expression = new Node(NodeType.ASSIGN, undefined, expression, exp);
+      } else {
+        expression = this.IDlessArithExpOrBexp(expression);
       }
 
       this.consume(TokenType.SEMI, 'Semicolon required.');
@@ -234,19 +236,25 @@ export const Parser = new class {
    * IDlessArithExpOrBexp ::= { '+' <Term> | '-' <Term> | '*' <Factor> | '/' <Factor>}
    *                          [ <BooleanOperator> <ArithExp> ]
    */
-  IDlessArithExpOrBexp () : Node {
-    let expression;
+  IDlessArithExpOrBexp (exp : Node) : Node {
+    let expression = exp
 
     if (this.match(TokenType.PLUS, TokenType.MINUS)) {
-      expression = this.Term();
+      const op = this.previous();
+      const nodeType = op.type === TokenType.PLUS ? NodeType.ADD : NodeType.SUB;
+
+      expression = new Node(nodeType, undefined, expression, this.Term());
     }  else if (this.match(TokenType.MULTIPLY, TokenType.DIVIDE)) {
-      expression = this.Factor();
+      const op = this.previous();
+      const nodeType = op.type === TokenType.MULTIPLY ? NodeType.MULTIPLY : NodeType.DIVIDE;
+
+      expression = new Node(nodeType, undefined, expression, this.Factor());
     }
 
     let boolOp = this.BooleanOprator();
     if (boolOp) {
       const exp = this.ArithExp();
-      expression = new Node(boolOp.nodeType, boolOp, expression, exp)
+      expression = new Node(boolOp.nodeType, undefined, expression, exp)
     }
 
     return expression as Node;
