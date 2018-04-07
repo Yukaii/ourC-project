@@ -36,6 +36,16 @@ test('Lexer', t => {
     new Token(TokenType.NUM, 1),
     new Token(TokenType.SEMI),
     new Token(TokenType.COMMENT, 'here the line comment')
+  ]);
+
+  t.deepEqual(Lexer.scan(`2   +3 // a line-comment here ; useless "input" here : 5+8;
+  ; // another line-comment ;;; ('5+8;' and ';;;' should be ignored)`), [
+    new Token(TokenType.NUM, 2),
+    new Token(TokenType.PLUS),
+    new Token(TokenType.NUM, 3),
+    new Token(TokenType.COMMENT, 'a line-comment here ; useless "input" here : 5+8;'),
+    new Token(TokenType.SEMI),
+    new Token(TokenType.COMMENT, `another line-comment ;;; ('5+8;' and ';;;' should be ignored)`)
   ])
 });
 
