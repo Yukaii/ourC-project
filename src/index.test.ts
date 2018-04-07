@@ -1,5 +1,10 @@
-import { Lexer, TokenType, Token } from './index';
+import { Lexer, TokenType, Token, Parser, NodeType, Node } from './index';
+import * as util from 'util';
 import test from 'ava';
+
+function log (object : any) {
+  console.log(util.inspect(object, true, null!));
+}
 
 test('Lexer', t => {
   t.deepEqual(Lexer.scan('a > -5;'), [
@@ -25,3 +30,21 @@ test('Lexer', t => {
     new Token(TokenType.COMMENT, 'here the line comment')
   ])
 });
+
+test.todo('// TODO: word boundary check, like 345.3435.345');
+
+test('Parse', t => {
+  const ast = Parser.parse(Lexer.scan('a := 1 + -5;'));
+
+  t.deepEqual(ast,
+    new Node(
+      NodeType.ASSIGN,
+      undefined,
+      new Node(NodeType.ID, new Token(TokenType.ID, 'a')), // left: symbol node
+      new Node(NodeType.ADD, undefined,
+        new Node(NodeType.INTEGER, new Token(TokenType.NUM, 1)),
+        new Node(NodeType.INTEGER, new Token(TokenType.NUM, -5))
+      )
+    )
+  );
+})
