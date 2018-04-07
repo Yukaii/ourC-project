@@ -30,7 +30,7 @@ const RULES : Map<TokenType, RegExp> = new Map([
   [TokenType.PLUS, /^\+/ ],
   [TokenType.MINUS, /^-/],
   [TokenType.MULTIPLY, /^\*/],
-  [TokenType.DIVIDE, /^\\/],
+  [TokenType.DIVIDE, /^\//],
   [TokenType.EQ, /^\=/],
   [TokenType.NEQ, /^<>/],
   [TokenType.GE, /^>=/],
@@ -143,7 +143,7 @@ export const Lexer = new class {
 
       if (!match) {
         // no token were match
-        throw new TypeError('Invalid token')
+        throw new TypeError(`<${this.buffer}> Invalid token`)
       }
     }
 
@@ -306,7 +306,7 @@ export const Parser = new class {
     let boolOp = this.BooleanOprator();
     if (boolOp) {
       const exp = this.ArithExp();
-      expression = new Node(boolOp.nodeType, boolOp, expression, exp)
+      expression = new Node(boolOp.nodeType, undefined, expression, exp)
     }
 
     return expression

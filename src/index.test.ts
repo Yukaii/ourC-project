@@ -59,6 +59,19 @@ test('Lexer', t => {
     new Token(TokenType.COMMENT, 'a line-comment here ; useless "input" here : 5+8;'),
     new Token(TokenType.SEMI),
     new Token(TokenType.COMMENT, `another line-comment ;;; ('5+8;' and ';;;' should be ignored)`)
+  ]);
+
+  t.deepEqual(Lexer.scan('( 3 - 500 / 10 ) > 100 ;'), [
+    new Token(TokenType.LPARAN),
+    new Token(TokenType.NUM, 3),
+    new Token(TokenType.MINUS),
+    new Token(TokenType.NUM, 500),
+    new Token(TokenType.DIVIDE),
+    new Token(TokenType.NUM, 10),
+    new Token(TokenType.RPARAN),
+    new Token(TokenType.GT),
+    new Token(TokenType.NUM, 100),
+    new Token(TokenType.SEMI)
   ])
 });
 
@@ -103,6 +116,25 @@ test('Parse', t => {
       )
     )
   );
+
+  t.deepEqual(parse('( 3 - 500 / 10 ) > 100 ;'),
+    new Node(
+      NodeType.GT,
+      undefined,
+      new Node(
+        NodeType.SUB,
+        undefined,
+        new Node(NodeType.INTEGER, new Token(TokenType.NUM, 3)),
+        new Node(
+          NodeType.DIVIDE,
+          undefined,
+          new Node(NodeType.INTEGER, new Token(TokenType.NUM, 500)),
+          new Node(NodeType.INTEGER, new Token(TokenType.NUM, 10)),
+        )
+      ),
+      new Node(NodeType.INTEGER, new Token(TokenType.NUM, 100)),
+    )
+  )
 })
 
 test('Test Intepreter', t => {
