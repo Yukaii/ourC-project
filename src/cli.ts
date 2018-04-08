@@ -33,7 +33,13 @@ let src = ''
 rl.on('line', function(line : string) {
   src += line;
   if (eol(line)) {
-    console.log(Interpreter.inteprete(src));
+    let result
+    try {
+      result = Interpreter.inteprete(src);
+    } catch (e) {
+      result = e
+    }
+    rl.write(result + '\n')
     src = ''
     prompt();
   } else if (line.trim() === 'quit') {
