@@ -10,8 +10,8 @@ function scan (src : string) {
   return Lexer.scan(src);
 }
 
-function parse (src : string) {
-  return Parser.parse(scan(src));
+function parse (src : string, trace = false) {
+  return Parser.parse(scan(src), trace);
 }
 
 function interpret (src : string) {
@@ -71,6 +71,19 @@ test('Lexer', t => {
     new Token(TokenType.RPARAN),
     new Token(TokenType.GT),
     new Token(TokenType.NUM, 100),
+    new Token(TokenType.SEMI)
+  ])
+
+  t.deepEqual(Lexer.scan('3 * (5 + 8) * 4;'), [
+    new Token(TokenType.NUM, 3),
+    new Token(TokenType.MULTIPLY),
+    new Token(TokenType.LPARAN),
+    new Token(TokenType.NUM, 5),
+    new Token(TokenType.PLUS),
+    new Token(TokenType.NUM, 8),
+    new Token(TokenType.RPARAN),
+    new Token(TokenType.MULTIPLY),
+    new Token(TokenType.NUM, 4),
     new Token(TokenType.SEMI)
   ])
 });
@@ -133,6 +146,25 @@ test('Parse', t => {
         )
       ),
       new Node(NodeType.INTEGER, new Token(TokenType.NUM, 100)),
+    )
+  )
+
+  t.deepEqual(parse('3 * (5 + 8) * 4;'),
+    new Node(
+      NodeType.MULTIPLY,
+      undefined,
+      new Node(
+        NodeType.MULTIPLY,
+        undefined,
+        new Node(NodeType.INTEGER, new Token(TokenType.NUM, 3)),
+        new Node(
+          NodeType.ADD,
+          undefined,
+          new Node(NodeType.INTEGER, new Token(TokenType.NUM, 5)),
+          new Node(NodeType.INTEGER, new Token(TokenType.NUM, 8)),
+        )
+      ),
+      new Node(NodeType.INTEGER, new Token(TokenType.NUM, 4)),
     )
   )
 })

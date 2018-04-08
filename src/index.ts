@@ -191,10 +191,12 @@ export class Node {
 export const Parser = new class {
   private tokens : Token[] = [];
   private cursor = 0;
+  private trace = false;
 
   constructor () { }
 
-  parse (tokens : Token[])  {
+  parse (tokens : Token[], trace = false)  {
+    this.trace = trace;
     this.cursor = 0;
     this.tokens = tokens;
 
@@ -223,7 +225,8 @@ export const Parser = new class {
       this.consume(TokenType.SEMI, 'Semicolon required.');
       return expression;
     } else {
-      const exp = this.NOT_IDStartArithExpOrBexp();
+      this.traceLog('Command: call NOT_ID_StartArithExpOrBexp');
+      const exp = this.NOT_ID_StartArithExpOrBexp();
       this.consume(TokenType.SEMI, 'Semicolon required.')
 
       if (exp) return exp;
@@ -239,16 +242,32 @@ export const Parser = new class {
   IDlessArithExpOrBexp (exp : Node) : Node {
     let expression = exp
 
-    if (this.match(TokenType.PLUS, TokenType.MINUS)) {
+    while (this.match(TokenType.PLUS, TokenType.MINUS, TokenType.MULTIPLY, TokenType.DIVIDE)) {
       const op = this.previous();
-      const nodeType = op.type === TokenType.PLUS ? NodeType.ADD : NodeType.SUB;
 
-      expression = new Node(nodeType, undefined, expression, this.Term());
-    }  else if (this.match(TokenType.MULTIPLY, TokenType.DIVIDE)) {
-      const op = this.previous();
-      const nodeType = op.type === TokenType.MULTIPLY ? NodeType.MULTIPLY : NodeType.DIVIDE;
+      let nodeType, isTerm
+      switch (op.type) {
+        case TokenType.PLUS:
+          nodeType = NodeType.ADD;
+          isTerm = true;
+          break;
+        case TokenType.MINUS:
+          nodeType = NodeType.SUB;
+          isTerm = true;
+          break;
+        case TokenType.MULTIPLY:
+          nodeType = NodeType.MULTIPLY;
+          isTerm = false;
+          break;
+        case TokenType.DIVIDE:
+          nodeType = NodeType.DIVIDE;
+          isTerm = false;
+          break;
+        default:
+          throw new TypeError('INVALID TOKEN TYPE HHHHHHH');
+      }
 
-      expression = new Node(nodeType, undefined, expression, this.Factor());
+      expression = new Node(nodeType, undefined, expression, isTerm ? this.Term() : this.Factor());
     }
 
     let boolOp = this.BooleanOprator();
@@ -260,6 +279,9 @@ export const Parser = new class {
     return expression as Node;
   }
 
+  /**
+   * <BooleanOprator> ::= '=' | '<>' | '>' | '<' | '>=' | '<='
+   */
   BooleanOprator () : Node {
     let expression
 
@@ -297,10 +319,11 @@ export const Parser = new class {
   }
 
   /**
-   * <NOT_IDStartArithExpOrBexp> ::= <NOT_ID_StartArithExp>
+   * <NOT_ID_StartArithExpOrBexp> ::= <NOT_ID_StartArithExp>
    *                               [ <BooleanOperator> <ArithExp> ]
    */
-  NOT_IDStartArithExpOrBexp () : Node {
+  NOT_ID_StartArithExpOrBexp () : Node {
+    this.traceLog('NOT_ID_StartArithExpOrBexp');
     let expression = this.NOT_ID_StartArithExp();
 
     let boolOp = this.BooleanOprator();
@@ -316,14 +339,14 @@ export const Parser = new class {
    * <NOT_ID_StartArithExp> ::= <NOT_ID_StartTerm> { '+' <Term> | '-' <Term> }
    */
   NOT_ID_StartArithExp () : Node {
+    this.traceLog('NOT_ID_StartArithExp');
     let expression = this.NOT_ID_StartTerm();
 
-    if (this.match(TokenType.PLUS, TokenType.MINUS)) {
+    while (this.match(TokenType.PLUS, TokenType.MINUS)) {
       const token = this.previous();
-      const term = this.Term();
-      return new Node(
+      expression = new Node(
         token.type === TokenType.PLUS ? NodeType.ADD : NodeType.SUB,
-        undefined, expression, term
+        undefined, expression, this.Term()
       )
     }
 
@@ -334,14 +357,15 @@ export const Parser = new class {
    * <NOT_ID_StartTerm> ::= <NOT_ID_StartFactor> { '*' <Factor> | '/' <Factor> }
    */
   NOT_ID_StartTerm () : Node {
+    this.traceLog('NOT_ID_StartTerm')
     let expression = this.NOT_ID_StartFactor();
 
-    if (this.match(TokenType.MULTIPLY, TokenType.DIVIDE)) {
+    while (this.match(TokenType.MULTIPLY, TokenType.DIVIDE)) {
       const token = this.previous();
-      const factor = this.Factor();
-      return new Node(
+
+      expression = new Node(
         token.type === TokenType.MULTIPLY ? NodeType.MULTIPLY : NodeType.DIVIDE,
-        undefined, expression, factor
+        undefined, expression, this.Factor()
       )
     }
 
@@ -352,6 +376,7 @@ export const Parser = new class {
    * <NOT_ID_StartFactor> ::= [ SIGN ] NUM | '(' <ArithExp> ')'
    */
   NOT_ID_StartFactor () : Node {
+    this.traceLog('NOT_ID_StartFactor')
     if (this.match(TokenType.PLUS, TokenType.MINUS)) {
       const sign = this.previous();
 
@@ -376,22 +401,16 @@ export const Parser = new class {
   ArithExp () : Node {
     let expression = this.Term();
 
-    if (this.match(TokenType.PLUS)) {
+    while (this.match(TokenType.PLUS, TokenType.MINUS)) {
+      const isAdd = this.previous().type === TokenType.PLUS;
+
       const exp = this.Term();
 
       if (!exp) {
         throw new TypeError('Missing Factor');
       }
 
-      expression = new Node(NodeType.ADD, undefined, expression, exp)
-    } else if (this.match(TokenType.MINUS)) {
-      const exp = this.Term();
-
-      if (!exp) {
-        throw new TypeError('Missing Factor');
-      }
-
-      expression = new Node(NodeType.SUB, undefined, expression, exp)
+      expression = new Node(isAdd ? NodeType.ADD : NodeType.SUB, undefined, expression, exp);
     }
 
     return expression;
@@ -401,24 +420,21 @@ export const Parser = new class {
    * Term ::= <Factor> { '*' <Factor> | '/' <Factor> }
    */
   Term () : Node {
+    this.traceLog('Term')
     let expression = this.Factor();
 
-    if (this.match(TokenType.MULTIPLY)) {
+    this.traceLog(expression)
+
+    while (this.match(TokenType.MULTIPLY, TokenType.DIVIDE)) {
+      const isMultiply = this.previous().type === TokenType.MULTIPLY;
+
       const exp = this.Factor();
 
       if (!exp) {
         throw new TypeError('Missing Factor');
       }
 
-      expression = new Node(NodeType.MULTIPLY, undefined, expression, exp)
-    } else if (this.match(TokenType.DIVIDE)) {
-      const exp = this.Factor();
-
-      if (!exp) {
-        throw new TypeError('Missing Factor');
-      }
-
-      expression = new Node(NodeType.DIVIDE, undefined, expression, exp)
+      expression = new Node(isMultiply ? NodeType.MULTIPLY : NodeType.DIVIDE, undefined, expression, exp);
     }
 
     return expression;
@@ -481,6 +497,12 @@ export const Parser = new class {
   private advance () : Token {
     if (!this.isAtEnd()) this.cursor++;
     return this.previous();
+  }
+
+  private traceLog (...args : any[]) {
+    if (this.trace) {
+      console.log(...arguments);
+    }
   }
 
   private check(tokenType : TokenType) : boolean {
