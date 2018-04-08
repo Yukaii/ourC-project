@@ -1,0 +1,23 @@
+{
+    "defaultSeverity": "error",
+    "extends": [
+    ],
+    "jsRules": {},
+    "rules": {
+      "new-parens": true,
+      "no-conditional-assignment": true,
+      "no-consecutive-blank-lines": false,
+      "no-unused-expression": true,
+      "no-duplicate-variable": true,
+      "space-before-function-paren": true,
+      "curly": true,
+      "class-name": true,
+      "semicolon": [
+        true,
+        "always"
+      ],
+      "triple-equals": true,
+      "indent": [true, "spaces", 2]
+    },
+    "rulesDirectory": []
+}

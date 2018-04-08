@@ -19,7 +19,7 @@ function emptyPrompt () {
 function eol (line : string) {
   if (line.includes(';')) {
     if (line.includes('//')) {
-      return line.indexOf(';') < line.indexOf('//')
+      return line.indexOf(';') < line.indexOf('//');
     } else {
       return true;
     }
@@ -28,26 +28,26 @@ function eol (line : string) {
   }
 }
 
-let src = ''
+let src = '';
 
-rl.on('line', function(line : string) {
+rl.on('line', function (line : string) {
   src += line;
   if (eol(line)) {
-    let result
+    let result;
     try {
       result = Interpreter.inteprete(src);
     } catch (e) {
-      result = e
+      result = e;
     }
-    rl.write(result + '\n')
-    src = ''
+    rl.write(result + '\n');
+    src = '';
     prompt();
   } else if (line.trim() === 'quit') {
     rl.close();
   } else {
     emptyPrompt();
   }
-}).on('close', function() {
+}).on('close', function () {
   process.exit(0);
 });
 

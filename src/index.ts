@@ -40,7 +40,7 @@ const RULES : Map<TokenType, RegExp> = new Map([
   [TokenType.LPARAN, /^\(/],
   [TokenType.RPARAN, /^\)/],
   [TokenType.NUM, /^([0-9]*[.])?[0-9]+/],
-])
+]);
 
 export class Token {
   constructor (
@@ -49,14 +49,14 @@ export class Token {
   ) {}
 
   public toString () {
-    return `Token<${this.type}${this.value ? '' : `, ${this.value}`}>`
+    return `Token<${this.type}${this.value ? '' : `, ${this.value}`}>`;
   }
 
   toJSON () {
     return {
       type: this.type,
       value: this.value
-    }
+    };
   }
 }
 
@@ -97,7 +97,7 @@ export const Lexer = new class {
 
       for (let [tokenType, rule] of this.rules) {
         const m = this.buffer.match(rule);
-        let value
+        let value;
         match = !!m;
 
         // matched!
@@ -124,7 +124,7 @@ export const Lexer = new class {
               value = rawString.match(this.rules.get(tokenType) as RegExp)![1].trim();
               break;
             case TokenType.BOOL:
-              value = rawString === 'true'
+              value = rawString === 'true';
               break;
             default:
               break;
@@ -143,7 +143,7 @@ export const Lexer = new class {
 
       if (!match) {
         // no token were match
-        throw new TypeError(`<${this.buffer}> Invalid token`)
+        throw new TypeError(`<${this.buffer}> Invalid token`);
       }
     }
 
@@ -184,7 +184,7 @@ export class Node {
   }
 
   toString () {
-    return `${this.nodeType}, ${this.value}, ${this.left}, ${this.right}`
+    return `${this.nodeType}, ${this.value}, ${this.left}, ${this.right}`;
   }
 }
 
@@ -227,9 +227,9 @@ export const Parser = new class {
     } else {
       this.traceLog('Command: call NOT_ID_StartArithExpOrBexp');
       const exp = this.NOT_ID_StartArithExpOrBexp();
-      this.consume(TokenType.SEMI, 'Semicolon required.')
+      this.consume(TokenType.SEMI, 'Semicolon required.');
 
-      if (exp) return exp;
+      if (exp) { return exp; }
 
       return this.quit(); // TODO: or error
     }
@@ -240,12 +240,12 @@ export const Parser = new class {
    *                          [ <BooleanOperator> <ArithExp> ]
    */
   IDlessArithExpOrBexp (exp : Node) : Node {
-    let expression = exp
+    let expression = exp;
 
     while (this.match(TokenType.PLUS, TokenType.MINUS, TokenType.MULTIPLY, TokenType.DIVIDE)) {
       const op = this.previous();
 
-      let nodeType, isTerm
+      let nodeType, isTerm;
       switch (op.type) {
         case TokenType.PLUS:
           nodeType = NodeType.ADD;
@@ -273,7 +273,7 @@ export const Parser = new class {
     let boolOp = this.BooleanOprator();
     if (boolOp) {
       const exp = this.ArithExp();
-      expression = new Node(boolOp.nodeType, undefined, expression, exp)
+      expression = new Node(boolOp.nodeType, undefined, expression, exp);
     }
 
     return expression as Node;
@@ -283,7 +283,7 @@ export const Parser = new class {
    * <BooleanOprator> ::= '=' | '<>' | '>' | '<' | '>=' | '<='
    */
   BooleanOprator () : Node {
-    let expression
+    let expression;
 
     if (this.match(TokenType.EQ, TokenType.NEQ, TokenType.GT, TokenType.GE, TokenType.LT, TokenType.LE)) {
       const cmp = this.previous();
@@ -312,7 +312,7 @@ export const Parser = new class {
           throw new TypeError('Invalid tokenType cmp');
       }
 
-      expression = new Node(nodeType)
+      expression = new Node(nodeType);
     }
 
     return expression as Node;
@@ -329,10 +329,10 @@ export const Parser = new class {
     let boolOp = this.BooleanOprator();
     if (boolOp) {
       const exp = this.ArithExp();
-      expression = new Node(boolOp.nodeType, undefined, expression, exp)
+      expression = new Node(boolOp.nodeType, undefined, expression, exp);
     }
 
-    return expression
+    return expression;
   }
 
   /**
@@ -347,7 +347,7 @@ export const Parser = new class {
       expression = new Node(
         token.type === TokenType.PLUS ? NodeType.ADD : NodeType.SUB,
         undefined, expression, this.Term()
-      )
+      );
     }
 
     return expression;
@@ -357,7 +357,7 @@ export const Parser = new class {
    * <NOT_ID_StartTerm> ::= <NOT_ID_StartFactor> { '*' <Factor> | '/' <Factor> }
    */
   NOT_ID_StartTerm () : Node {
-    this.traceLog('NOT_ID_StartTerm')
+    this.traceLog('NOT_ID_StartTerm');
     let expression = this.NOT_ID_StartFactor();
 
     while (this.match(TokenType.MULTIPLY, TokenType.DIVIDE)) {
@@ -366,7 +366,7 @@ export const Parser = new class {
       expression = new Node(
         token.type === TokenType.MULTIPLY ? NodeType.MULTIPLY : NodeType.DIVIDE,
         undefined, expression, this.Factor()
-      )
+      );
     }
 
     return expression;
@@ -376,16 +376,16 @@ export const Parser = new class {
    * <NOT_ID_StartFactor> ::= [ SIGN ] NUM | '(' <ArithExp> ')'
    */
   NOT_ID_StartFactor () : Node {
-    this.traceLog('NOT_ID_StartFactor')
+    this.traceLog('NOT_ID_StartFactor');
     if (this.match(TokenType.PLUS, TokenType.MINUS)) {
       const sign = this.previous();
 
       this.consume(TokenType.NUM, 'Number expected after sign');
       const number = this.previous();
-      return new Node(Number.isInteger(number.value) ? NodeType.INTEGER : NodeType.FLOAT, number)
+      return new Node(Number.isInteger(number.value) ? NodeType.INTEGER : NodeType.FLOAT, number);
     } else if (this.match(TokenType.NUM)) {
       const number = this.previous();
-      return new Node(Number.isInteger(number.value) ? NodeType.INTEGER : NodeType.FLOAT, number)
+      return new Node(Number.isInteger(number.value) ? NodeType.INTEGER : NodeType.FLOAT, number);
     } else if (this.match(TokenType.LPARAN)) {
       const expression = this.ArithExp();
       this.consume(TokenType.RPARAN, 'Missing right paranthesis');
@@ -420,10 +420,10 @@ export const Parser = new class {
    * Term ::= <Factor> { '*' <Factor> | '/' <Factor> }
    */
   Term () : Node {
-    this.traceLog('Term')
+    this.traceLog('Term');
     let expression = this.Factor();
 
-    this.traceLog(expression)
+    this.traceLog(expression);
 
     while (this.match(TokenType.MULTIPLY, TokenType.DIVIDE)) {
       const isMultiply = this.previous().type === TokenType.MULTIPLY;
@@ -454,12 +454,12 @@ export const Parser = new class {
       const number = this.previous();
       // deal with sign
       if (sign.type === TokenType.MINUS) {
-        number.value = -number.value
+        number.value = -number.value;
       }
-      return new Node(Number.isInteger(number.value) ? NodeType.INTEGER : NodeType.FLOAT, number)
+      return new Node(Number.isInteger(number.value) ? NodeType.INTEGER : NodeType.FLOAT, number);
     } else if (this.match(TokenType.NUM)) {
       const number = this.previous();
-      return new Node(Number.isInteger(number.value) ? NodeType.INTEGER : NodeType.FLOAT, number)
+      return new Node(Number.isInteger(number.value) ? NodeType.INTEGER : NodeType.FLOAT, number);
     } else if (this.match(TokenType.LPARAN)) {
       const expression = this.ArithExp();
       this.consume(TokenType.RPARAN, 'Missing right paranthesis');
@@ -478,12 +478,12 @@ export const Parser = new class {
   }
 
   private consume (type : TokenType, message : string) : Token {
-    if (this.check(type)) return this.advance();
+    if (this.check(type)) { return this.advance(); }
 
     throw new TypeError(`${this.peek()}: ${message}`);
   }
 
-  private match(...tokenTypes : TokenType[]) {
+  private match (...tokenTypes : TokenType[]) {
     for (let type of tokenTypes) {
       if (this.check(type)) {
         this.advance();
@@ -495,7 +495,7 @@ export const Parser = new class {
   }
 
   private advance () : Token {
-    if (!this.isAtEnd()) this.cursor++;
+    if (!this.isAtEnd()) { this.cursor++; }
     return this.previous();
   }
 
@@ -505,12 +505,12 @@ export const Parser = new class {
     }
   }
 
-  private check(tokenType : TokenType) : boolean {
-    if (this.isAtEnd()) return false;
-    return this.peek().type == tokenType;
+  private check (tokenType : TokenType) : boolean {
+    if (this.isAtEnd()) { return false; }
+    return this.peek().type === tokenType;
   }
 
-  private peek() : Token {
+  private peek () : Token {
     return this.tokens[this.cursor];
   }
 
@@ -519,7 +519,7 @@ export const Parser = new class {
   }
 
   private isAtEnd () {
-    return this.cursor === this.tokens.length
+    return this.cursor === this.tokens.length;
   }
 
 }();
@@ -552,6 +552,7 @@ export const Interpreter = new class {
   }
 
   visit (node : Node) : any {
+    let token;
     switch(node.nodeType) {
       // binary operations
       case NodeType.ADD:
@@ -580,20 +581,20 @@ export const Interpreter = new class {
       // value node
       case NodeType.INTEGER:
       case NodeType.FLOAT:
-        var token = node.value as Token;
+        token = node.value as Token;
         return token.value;
 
       case NodeType.ASSIGN:
-        var idNode = node.left as Node;
-        var token = idNode.value as Token;
+        const idNode = node.left as Node;
+        token = idNode.value as Token;
         return TABLE.set(token.value, this.visit(node.right as Node));
 
       case NodeType.ID:
-        var token = node.value as Token;
+        token = node.value as Token;
         return TABLE.get(token.value);
 
       default:
         throw new TypeError(`${NodeType} type is not implemented`);
     }
   }
-};
+}();
